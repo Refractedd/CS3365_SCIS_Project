@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Launch GUI",
+            "request": "launch",
+            "vmArgs": "--module-path C:\\Program Files (x86)\\JavaFX\\lib --add-modules javafx.controls, javafx.fxml",
+            "mainClass": "GUI",
+            "projectName": "CS3365_SCIS_Project_3d204251"
+        },
+        {
+            "type": "java",
+            "name": "Launch TestDatabase",
+            "request": "launch",
+            "mainClass": "TestDatabase",
+            "projectName": "CS3365_SCIS_Project_3d204251"
+        }
+    ]
+}
