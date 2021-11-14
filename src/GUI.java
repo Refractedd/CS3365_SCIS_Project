@@ -39,10 +39,10 @@ public class GUI extends Application
        resultLabelPropertyTax = new Label();           
        
        // Set up GUI 
-       HBox hbox1 = new HBox(10, promptLabelActual, actualValue);          
-       VBox vbox = new VBox(10, hbox1, calcButton, resultLabelAssessmentVal, resultLabelPropertyTax);                
+       HBox hbox1 = new HBox(20, promptLabelActual, actualValue);          
+       VBox vbox = new VBox(20, hbox1, calcButton, resultLabelAssessmentVal, resultLabelPropertyTax);                
        vbox.setAlignment(Pos.CENTER);
-       vbox.setPadding(new Insets(15));           
+       vbox.setPadding(new Insets(25));           
        Scene scene = new Scene(vbox);
        primaryStage.setScene(scene);             
        primaryStage.setTitle("Assessment Value and Property Tax Calculator");                

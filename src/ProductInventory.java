@@ -1,16 +1,12 @@
-public class ProductInventory {
+public class ProductInventory extends CheckoutControl {
     private double price;
-    private int amount;
+    public int amount;
     public int id;
 
-    public ProductInventory(){
+    public int ProductID(){
         this.price = 0.00;
-        this.amount = 0;
+        amount = 1;
         this.id = -1;
-    }
-    public ProductInventory(double p, int a, int id){
-        this.price = p;
-        this.amount = a;
-        this.id = id;
+        return amount;
     }
 }
