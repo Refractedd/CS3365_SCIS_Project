@@ -6,15 +6,9 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
             "name": "Launch GUI",
             "request": "launch",
-            "vmArgs": "--module-path C:\\Program Files (x86)\\JavaFX\\lib --add-modules javafx.controls, javafx.fxml",
+            "vmArgs": "--module-path \"C:/Program Files (x86)/JavaFX/lib\" --add-modules javafx.controls,javafx.fxml",
             "mainClass": "GUI",
             "projectName": "CS3365_SCIS_Project_3d204251"
         },
@@ -24,6 +18,12 @@
             "request": "launch",
             "mainClass": "TestDatabase",
             "projectName": "CS3365_SCIS_Project_3d204251"
+        },
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}"
         }
     ]
 }
