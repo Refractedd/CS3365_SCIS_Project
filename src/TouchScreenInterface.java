@@ -12,7 +12,10 @@ import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 public class TouchScreenInterface extends Application{
     public String[] productInfo;
+    public String orderProductInfo = "";
     private TextField productIDEntry;
+    private Label productInfoDisplay;
+    private Label scaleItem;
 
     public String[] requestProductInfo(int productID) {
         CheckoutControl checkoutObj = new CheckoutControl();
@@ -21,16 +24,22 @@ public class TouchScreenInterface extends Application{
     }
 
     public void start(Stage primaryStage) {
-        Label promptProductID = new Label("ProductID: ");
+        Label promptProductID = new Label("Product ID: ");
         productIDEntry = new TextField();
 
         Button idButton = new Button("ITEM-ID");
         idButton.setOnAction(new itemIDButtonHandler());
 
-        HBox hbox1 = new HBox(10, promptProductID, productIDEntry);
-        VBox vbox1 = new VBox(10, hbox1, idButton);
+        Button scaleButton = new Button("SCALE");
+        // scaleButton.setOnAction(new itemIDButtonHandler());
+        scaleItem = new Label();
+        productInfoDisplay = new Label();
+
+        HBox hbox1 = new HBox(100, promptProductID, productIDEntry);
+        VBox vbox1 = new VBox(100, hbox1, idButton, scaleButton, scaleItem, productInfoDisplay);
+        hbox1.setAlignment(Pos.CENTER);
         vbox1.setAlignment(Pos.CENTER);
-        vbox1.setPadding(new Insets(15));
+        vbox1.setPadding(new Insets(5));
         Scene scene = new Scene(vbox1);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Cashier Display");
@@ -42,8 +51,14 @@ public class TouchScreenInterface extends Application{
             TouchScreenInterface obj = new TouchScreenInterface();
             int productID = Integer.parseInt(productIDEntry.getText());
             String[] foundProductInfo = obj.requestProductInfo(productID);
-            for (String i: foundProductInfo) {
-                System.out.println(i);
+            System.out.println(foundProductInfo[0]);
+            if (foundProductInfo[0].equals("Bulk Item. Please Weight Item.")) {
+                scaleItem.setText(String.format("Bulk Item. Please Weight Item."));
+            }
+            else {
+                orderProductInfo += foundProductInfo[0] + " " + foundProductInfo[1] + "\n";
+                productInfoDisplay.setText(String.format(orderProductInfo));
+                scaleItem.setText(String.format(""));
             }
         }
     }

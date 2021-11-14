@@ -1,2 +1,3 @@
-public interface CustomerDisplayInterface {
+public class CustomerDisplayInterface {
+    
 }
