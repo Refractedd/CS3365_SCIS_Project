@@ -51,7 +51,6 @@ public class TouchScreenInterface extends Application{
             TouchScreenInterface obj = new TouchScreenInterface();
             int productID = Integer.parseInt(productIDEntry.getText());
             String[] foundProductInfo = obj.requestProductInfo(productID);
-            System.out.println(foundProductInfo[0]);
             if (foundProductInfo[0].equals("Bulk Item. Please Weight Item.")) {
                 scaleItem.setText(String.format("Bulk Item. Please Weight Item."));
             }
