@@ -12,7 +12,7 @@ import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 public class TouchScreenInterface extends Application{
     public String[] productInfo;
-    public String orderProductInfo = "";
+    public String productInfoCashier = "";
     private TextField productIDEntry;
     private Label productInfoDisplay;
     private Label scaleItem;
@@ -55,8 +55,8 @@ public class TouchScreenInterface extends Application{
                 scaleItem.setText(String.format("Bulk Item. Please Weight Item."));
             }
             else {
-                orderProductInfo += foundProductInfo[0] + " " + foundProductInfo[1] + "\n";
-                productInfoDisplay.setText(String.format(orderProductInfo));
+                productInfoCashier += foundProductInfo[0] + " " + foundProductInfo[1] + "\n";
+                productInfoDisplay.setText(String.format(productInfoCashier));
                 scaleItem.setText(String.format(""));
             }
         }
