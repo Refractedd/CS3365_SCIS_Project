@@ -6,6 +6,14 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Main",
+            "request": "launch",
+            "vmArgs": "--module-path \"C:/Program Files (x86)/JavaFX/lib\" --add-modules javafx.controls,javafx.fxml",
+            "mainClass": "Main",
+            "projectName": "CS3365_SCIS_Project_3d204251"
+        },
+        {
+            "type": "java",
             "name": "Launch TouchScreenInterface",
             "request": "launch",
             "vmArgs": "--module-path \"C:/Program Files (x86)/JavaFX/lib\" --add-modules javafx.controls,javafx.fxml",
