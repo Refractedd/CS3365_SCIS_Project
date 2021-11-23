@@ -62,7 +62,7 @@ public class Order {
         return false;
     }
 
-    double[] calculateTotalPrice() {
+    double[] calculateTotalPrice(double subTotal) {
         try (Connection connection = DriverManager.getConnection(connectionUrl);
                 Statement statement = connection.createStatement();) {
             String selectSql = "SELECT * FROM [dbo].[Order]";
@@ -85,7 +85,7 @@ public class Order {
                     productTotal += resultSetPrice.getDouble("ProductPrice");
                 }
             }
-            double[] finalTotals = {productTotal, productTotal + (productTotal * .0625)};
+            double[] finalTotals = {subTotal, subTotal + (subTotal * .0625)};
             return finalTotals;
         }
         catch (SQLException e) {
@@ -117,5 +117,80 @@ public class Order {
         catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    void updatePaymentTypeAmount(String paymentAmount, String paymentType) {
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+                Statement statement = connection.createStatement();) {
+            String selectSql = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSet = statement.executeQuery(selectSql);
+            while (resultSet.next()) {
+                currentOrderID = resultSet.getInt("OrderID");
+            }
+            PreparedStatement updatedPaymentAmount = connection.prepareStatement("UPDATE [dbo].[Order] SET PaymentAmount = ? WHERE OrderID = ?");
+            updatedPaymentAmount.setDouble(1, Double.parseDouble(paymentAmount));
+            updatedPaymentAmount.setInt(2, currentOrderID);
+            updatedPaymentAmount.execute();
+            PreparedStatement updatedPaymentType = connection.prepareStatement("UPDATE [dbo].[Order] SET PaymentType = ? WHERE OrderID = ?");
+            updatedPaymentType.setString(1, paymentType);
+            updatedPaymentType.setInt(2, currentOrderID);
+            updatedPaymentType.execute();
+            
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    double updateAuthorizationNumCalculateChange(int authorizationNum){
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+                Statement statement = connection.createStatement();) {
+            String selectOrder = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSet = statement.executeQuery(selectOrder);
+            double calculatedChange = 0.0;
+            while (resultSet.next()) {
+                currentOrderID = resultSet.getInt("OrderID");
+            }
+            PreparedStatement updatedPaymentAmount = connection.prepareStatement("UPDATE [dbo].[Order] SET AuthorizationNum = ? WHERE OrderID = ?");
+            updatedPaymentAmount.setInt(1, authorizationNum);
+            updatedPaymentAmount.setInt(2, currentOrderID);
+            updatedPaymentAmount.execute();
+            String selectTotalAndPaymentAmount = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSetChange = statement.executeQuery(selectTotalAndPaymentAmount);
+            while (resultSetChange.next()) {
+                if (resultSetChange.getInt("OrderID") == currentOrderID) {
+                    calculatedChange = resultSetChange.getDouble("PaymentAmount") - resultSetChange.getDouble("OrderTotal");
+                }
+            }
+            return calculatedChange;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1.0;
+    }
+    
+    double cashOrCheckChange() {
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+            Statement statement = connection.createStatement();) {
+            String selectOrder = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSet = statement.executeQuery(selectOrder);
+            double calculatedChange = 0.0;
+            while (resultSet.next()) {
+                currentOrderID = resultSet.getInt("OrderID");
+            }
+            String selectTotalAndPaymentAmount = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSetChange = statement.executeQuery(selectTotalAndPaymentAmount);
+            while (resultSetChange.next()) {
+                if (resultSetChange.getInt("OrderID") == currentOrderID) {
+                    calculatedChange = resultSetChange.getDouble("PaymentAmount") - resultSetChange.getDouble("OrderTotal");
+                }
+            }
+            return calculatedChange;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1.0;
     }
 }

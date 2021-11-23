@@ -3,6 +3,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.SubtitleTrack;
 import javafx.scene.text.Text;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
@@ -18,10 +19,18 @@ import java.text.DecimalFormat;
 
 public class Main extends Application{
     DecimalFormat df = new DecimalFormat("#.##");
+    private String cardNum;
+    private double subTotal = 0;
+    private double bulkWeight;
+    private double calculatedChangeCashCheck;
+    private double[] calculatedChangeAuthNum;
+    private double[] totalValues;
     private String productInfo = "";
     private String orderProductIDs = "";
     private String memberPhoneNum;
     private String loyalMemberPIN;
+    private boolean loyalMemberChecked = false;
+    private boolean loyalMemberStatus = false;
     private TextField productIDEntry;
     private Label productInfoDisplayCashier;
     private Label productInfoDisplayCustomer;
@@ -34,9 +43,24 @@ public class Main extends Application{
     private Label subTotalCashier;
     private Label taxCashier;
     private Label finalTotalCashier;
+    private Label changeAmountCashier;
     private Label subTotalCustomer;
     private Label taxCustomer;
     private Label finalTotalCustomer;
+    private Label changeAmountCustomer;
+    private TextField paymentAmountEntry;
+    private TextField cardNumberEntry;
+    private TextField expDateEntry;
+    private TextField cvvEntry;
+    private TextField zipCodeEntry;
+    private Label openTill;
+    private Button closeTillButton;
+    private Label receiptProductInfo;
+    private Label receiptCardNumber;
+    private Label receiptAuthNumber;
+    private Label receiptTotalInformation;
+    private Label cardDenied;
+    Button cancelOrderButton;
     Button totalButton;
     Button idButton;
     HBox hboxCashierMain;
@@ -48,11 +72,13 @@ public class Main extends Application{
     VBox vboxCustomerLoyalMember;
     VBox vboxCustomerTotal;
     VBox vboxCashierPaymentType;
+    VBox vboxCustomerCreditDebitPayment;
+    VBox vboxEndCheckout;
+    VBox vboxCustomerReceipt;
 
     TouchScreenInterface touchscreenObj = new TouchScreenInterface();
-    CreditDebitReaderInterface loyalCheckObj = new CreditDebitReaderInterface();
-    private boolean loyalMemberChecked = false;
-    private boolean loyalMemberStatus = false;
+    CreditDebitReaderInterface creditDebitReaderObj = new CreditDebitReaderInterface();
+    
 
     public void start(Stage primaryStage) {
         Label promptProductID = new Label("Product ID: ");
@@ -90,10 +116,14 @@ public class Main extends Application{
         subTotalCashier = new Label();
         taxCashier = new Label();
         finalTotalCashier = new Label();
+        changeAmountCashier = new Label();
+        changeAmountCashier.setVisible(false);
 
         subTotalCustomer = new Label();
         taxCustomer = new Label();
         finalTotalCustomer = new Label();
+        changeAmountCustomer = new Label();
+        changeAmountCustomer.setVisible(false);
 
         hboxCashierMain = new HBox(10, promptProductID, productIDEntry);
         HBox hboxCashierScale = new HBox(10, promptProductScale, productWeightEntry);
@@ -104,11 +134,11 @@ public class Main extends Application{
         vboxCashierMain = new VBox(10, loyalMemberResultCashier, productInfoDisplayCashier);
         vboxCashierEntry = new VBox(10, hboxCashierMain, idButton, totalButton);
         vboxCashierScale = new VBox(10, hboxCashierScale, scaleButton, scaleItem);
-        vboxCashierTotal = new VBox(10, subTotalCashier, taxCashier, finalTotalCashier);
+        vboxCashierTotal = new VBox(10, subTotalCashier, taxCashier, finalTotalCashier, changeAmountCashier);
         
         vboxCustomerMain = new VBox(10, loyalMemberResultCustomer, productInfoDisplayCustomer);
         vboxCustomerLoyalMember = new VBox(10, loyalMember, hboxCustomerPhoneNum, hboxCustomerMemberPIN, hboxCustomerButtons);
-        vboxCustomerTotal = new VBox(10, subTotalCustomer, taxCustomer, finalTotalCustomer);
+        vboxCustomerTotal = new VBox(10, subTotalCustomer, taxCustomer, finalTotalCustomer, changeAmountCustomer);
 
         vboxCashierScale.setVisible(false);
         vboxCashierTotal.setVisible(false);
@@ -136,15 +166,79 @@ public class Main extends Application{
         vboxCustomerTotal.setAlignment(Pos.BOTTOM_CENTER);
         vboxCustomerTotal.setPadding(new Insets(50,20,50,20));
 
-        /*Button creditDebitPaymentButton = new Button("Credit/Debit");
-        Button cashPaymentButton = new Button("Cash");
-        Button checkPaymentButton = new Button("Check");
+        Label promptPaymentAmount = new Label("Payment Amount: ");
+        paymentAmountEntry = new TextField();
+        Button creditDebitPaymentButton = new Button("CREDIT/DEBIT");
+        creditDebitPaymentButton.setOnAction(new creditDebitButtonHandler());
+        Button cashPaymentButton = new Button("CASH");
+        cashPaymentButton.setOnAction(new cashButtonHandler());
+        Button checkPaymentButton = new Button("CHECK");
+        checkPaymentButton.setOnAction(new checkButtonHandler());
+        cardDenied = new Label("Card Denied. Try Again Or Cancel.");
+        cancelOrderButton = new Button("CANCEL ORDER");
+        cancelOrderButton.setOnAction(new cancelOrderButtonHandler());
+        cardDenied.setVisible(false);
+        cancelOrderButton.setVisible(false);
 
-        vboxCashierPaymentType = new VBox(10, creditDebitPaymentButton, cashPaymentButton, checkPaymentButton);*/
+        Label promptCardNumber = new Label("Card Number: ");
+        cardNumberEntry = new TextField();
+        Label promptExpDate = new Label("Expiration Date: ");
+        expDateEntry = new TextField();
+        Label promptCVV = new Label("CVV: ");
+        cvvEntry = new TextField();
+        Label promptZipCode = new Label("Zip Code: ");
+        zipCodeEntry = new TextField();
+        Button submitCardInfoButton = new Button("SUBMIT");
+        submitCardInfoButton.setOnAction(new submitCardInfoButtonHandler());
+
+        openTill = new Label("Till is Open. ");
+        openTill.setVisible(false);
+
+        closeTillButton = new Button("Order Complete. Close Till.");
+        closeTillButton.setOnAction(new closeTillButtonHandler());
+
+        Label receipt = new Label("Order Receipt");
+        receiptProductInfo = new Label();
+        receiptAuthNumber = new Label();
+        receiptCardNumber = new Label();
+        receiptTotalInformation = new Label();
+        
+        HBox hboxPaymentAmount = new HBox(10, promptPaymentAmount, paymentAmountEntry);
+        HBox hboxCardNum = new HBox(10, promptCardNumber, cardNumberEntry);
+        HBox hboxExpDate = new HBox(10, promptExpDate, expDateEntry);
+        HBox hboxCVV = new HBox(10, promptCVV, cvvEntry);
+        HBox hboxZipCode = new HBox(10, promptZipCode, zipCodeEntry);
+
+        vboxCashierPaymentType = new VBox(10, cardDenied, openTill, hboxPaymentAmount, creditDebitPaymentButton, cashPaymentButton, checkPaymentButton, cancelOrderButton);
+        vboxCustomerCreditDebitPayment = new VBox(10, hboxCardNum, hboxExpDate, hboxCVV, hboxZipCode, submitCardInfoButton);
+        vboxEndCheckout = new VBox(10, closeTillButton);
+        vboxCustomerReceipt = new VBox(10, receipt, receiptProductInfo, receiptAuthNumber, receiptCardNumber, receiptTotalInformation);
+
+        hboxPaymentAmount.setAlignment(Pos.CENTER);
+        hboxCardNum.setAlignment(Pos.CENTER);
+        hboxExpDate.setAlignment(Pos.CENTER);
+        hboxCVV.setAlignment(Pos.CENTER);
+        hboxZipCode.setAlignment(Pos.CENTER);
+
+        vboxCashierPaymentType.setAlignment(Pos.CENTER);
+        vboxCashierPaymentType.setPadding(new Insets(50,20,50,20));
+        vboxCashierPaymentType.setVisible(false);
+
+        vboxCustomerCreditDebitPayment.setAlignment(Pos.CENTER);
+        vboxCustomerCreditDebitPayment.setPadding(new Insets(50,20,50,20));
+        vboxCustomerCreditDebitPayment.setVisible(false);
+
+        vboxEndCheckout.setAlignment(Pos.CENTER);
+        vboxEndCheckout.setPadding(new Insets(50,20,50,20));
+        vboxEndCheckout.setVisible(false);
+
+        vboxCustomerReceipt.setAlignment(Pos.CENTER);
+        vboxCustomerReceipt.setPadding(new Insets(50,20,50,20));
+        vboxCustomerReceipt.setVisible(false);
 
         SplitPane splitPane = new SplitPane();
-        StackPane cashierDisplay = new StackPane(vboxCashierMain, vboxCashierEntry, vboxCashierScale, vboxCashierTotal);
-        StackPane customerDisplay = new StackPane(vboxCustomerMain, vboxCustomerLoyalMember, vboxCustomerTotal);
+        StackPane cashierDisplay = new StackPane(vboxCashierMain, vboxCashierEntry, vboxCashierScale, vboxCashierTotal, vboxCashierPaymentType, vboxEndCheckout);
+        StackPane customerDisplay = new StackPane(vboxCustomerMain, vboxCustomerLoyalMember, vboxCustomerTotal, vboxCustomerCreditDebitPayment, vboxCustomerReceipt);
         splitPane.getItems().addAll(cashierDisplay, customerDisplay);
         
 
@@ -181,6 +275,7 @@ public class Main extends Application{
             }
             else {
                 productInfo += foundProductInfo[0] + " $" + foundProductInfo[1] + "\n";
+                subTotal += Double.parseDouble(foundProductInfo[1]);
                 productInfoDisplayCashier.setText(String.format(productInfo));
                 productInfoDisplayCustomer.setText(String.format(productInfo));
             }
@@ -190,9 +285,10 @@ public class Main extends Application{
     class scaleButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
-            double weight = Double.parseDouble(productWeightEntry.getText());
-            String calculatedPrice = df.format(weight * Double.parseDouble(foundProductInfo[1]));
-            productInfo += foundProductInfo[0] + " $" + calculatedPrice + " (" + weight + "lbs @ $" + df.format(Double.parseDouble(foundProductInfo[1])) + "/lb.)" + "\n";
+            bulkWeight = Double.parseDouble(productWeightEntry.getText());
+            String calculatedPrice = df.format(bulkWeight * Double.parseDouble(foundProductInfo[1]));
+            subTotal += Double.parseDouble(calculatedPrice);
+            productInfo += foundProductInfo[0] + " $" + calculatedPrice + " (" + bulkWeight + "lbs @ $" + df.format(Double.parseDouble(foundProductInfo[1])) + "/lb.)" + "\n";
             productInfoDisplayCashier.setText(String.format(productInfo));
             productInfoDisplayCustomer.setText(String.format(productInfo));
             vboxCashierScale.setVisible(false);
@@ -206,8 +302,8 @@ public class Main extends Application{
             totalButton.setVisible(true);
             memberPhoneNum = phoneNumEntry.getText();
             loyalMemberPIN = memberPINEntry.getText();
-            loyalCheckObj = new CreditDebitReaderInterface();
-            loyalMemberStatus = loyalCheckObj.loyalMemberEntry(memberPhoneNum, loyalMemberPIN);
+            creditDebitReaderObj = new CreditDebitReaderInterface();
+            loyalMemberStatus = creditDebitReaderObj.loyalMemberEntry(memberPhoneNum, loyalMemberPIN);
             if (loyalMemberStatus == true) {
                 loyalMemberResultCashier.setText("Loyalty Member Account Verified.");
                 loyalMemberResultCustomer.setText("Loyalty Member Account Verified.");
@@ -227,7 +323,7 @@ public class Main extends Application{
         @Override
         public void handle(ActionEvent event) {
             totalButton.setVisible(true);
-            loyalCheckObj.loyalMemberEntry("Cancel", "Cancel");
+            creditDebitReaderObj.loyalMemberEntry("Cancel", "Cancel");
             loyalMemberResultCashier.setText("Loyalty Member Account Cancelled.");
             loyalMemberResultCustomer.setText("Loyalty Member Account Cancelled.");
             loyalMemberResultCashier.setVisible(true);
@@ -241,7 +337,7 @@ public class Main extends Application{
         @Override
         public void handle(ActionEvent event) {
             String[] phoneNumMemberPin = {memberPhoneNum, loyalMemberPIN};
-            double[] totalValues = touchscreenObj.calculateTotal(phoneNumMemberPin, loyalMemberStatus);
+            totalValues = touchscreenObj.calculateTotal(phoneNumMemberPin, loyalMemberStatus, subTotal);
             subTotalCashier.setText("Subtotal: $" + df.format(totalValues[0]));
             taxCashier.setText("Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]));
             finalTotalCashier.setText("Total: $"+ df.format(totalValues[1]));
@@ -253,9 +349,110 @@ public class Main extends Application{
             vboxCashierEntry.setVisible(false);
             vboxCashierTotal.setVisible(true);
             vboxCustomerTotal.setVisible(true);
+            vboxCashierPaymentType.setVisible(true);
+            openTill.setVisible(true);
+        }
+    }
+
+    class creditDebitButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            String paymentAmount = paymentAmountEntry.getText();
+            String paymentType = "Credit/Debit";
+            touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
+            vboxCustomerCreditDebitPayment.setVisible(true);
+            //vboxCashierPaymentType.setVisible(false);
+        }
+    }
+
+    class submitCardInfoButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            cardNum = cardNumberEntry.getText();
+            calculatedChangeAuthNum = creditDebitReaderObj.creditDebitEntry(cardNumberEntry.getText(), expDateEntry.getText(), Integer.parseInt(cvvEntry.getText()), Integer.parseInt(zipCodeEntry.getText()));
+            if (calculatedChangeAuthNum[0] == -1.0 & calculatedChangeAuthNum[1] == -1.0) {
+                vboxCustomerCreditDebitPayment.setVisible(false);
+                cardDenied.setVisible(true);
+                cancelOrderButton.setVisible(true);
+            }
+            else {
+                changeAmountCashier.setVisible(true);
+                changeAmountCashier.setText("Change Amount: $" + df.format(calculatedChangeAuthNum[0]));
+                receiptProductInfo.setText(productInfo);
+                receiptAuthNumber.setText("Authorization Number: " + String.valueOf((int)calculatedChangeAuthNum[1]));
+                receiptCardNumber.setText("Card Number: " + cardNum);
+                receiptTotalInformation.setText("Subtotal: $" + df.format(totalValues[0]) + "\n" + "Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]) + "\n" + "Total: $"+ df.format(totalValues[1]) + "\n" + "Change Amount: $" + df.format(calculatedChangeAuthNum[0]));
+                vboxCustomerCreditDebitPayment.setVisible(false);
+                vboxEndCheckout.setVisible(true);
+                vboxCustomerReceipt.setVisible(true);
+                vboxCustomerTotal.setVisible(false);
+                vboxCustomerMain.setVisible(false);
+                vboxCashierMain.setVisible(false);
+                vboxCashierPaymentType.setVisible(false);
+            }
+        }
+    }
+
+    class closeTillButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+
+        }
+    }
+
+    class cashButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            String paymentAmount = paymentAmountEntry.getText();
+            String paymentType = "Cash";
+            touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
+            calculatedChangeCashCheck = creditDebitReaderObj.cashOrChangeEntry();
+            changeAmountCashier.setVisible(true);
+            changeAmountCashier.setText("Change Amount: $" + df.format(calculatedChangeCashCheck));
+            receiptProductInfo.setText(productInfo);
+            receiptTotalInformation.setText("Cash Payment \nSubtotal: $" + df.format(totalValues[0]) + "\n" + "Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]) + "\n" + "Total: $"+ df.format(totalValues[1]) + "\n" + "Change Amount: $" + df.format(calculatedChangeCashCheck));
+            vboxCustomerCreditDebitPayment.setVisible(false);
+            vboxEndCheckout.setVisible(true);
+            vboxCustomerReceipt.setVisible(true);
+            vboxCustomerTotal.setVisible(false);
+            vboxCustomerMain.setVisible(false);
+            vboxCashierMain.setVisible(false);
+            vboxCashierPaymentType.setVisible(false);
+            receiptAuthNumber.setVisible(false);
+            receiptCardNumber.setVisible(false);
+        }
+    }
+
+    class checkButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            String paymentAmount = paymentAmountEntry.getText();
+            String paymentType = "Check";
+            touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
+            calculatedChangeCashCheck = creditDebitReaderObj.cashOrChangeEntry();
+            changeAmountCashier.setVisible(true);
+            changeAmountCashier.setText("Change Amount: $" + df.format(calculatedChangeCashCheck));
+            receiptProductInfo.setText(productInfo);
+            receiptTotalInformation.setText("Check Payment \n Subtotal: $" + df.format(totalValues[0]) + "\n" + "Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]) + "\n" + "Total: $"+ df.format(totalValues[1]) + "\n" + "Change Amount: $" + df.format(calculatedChangeCashCheck));
+            vboxCustomerCreditDebitPayment.setVisible(false);
+            vboxEndCheckout.setVisible(true);
+            vboxCustomerReceipt.setVisible(true);
+            vboxCustomerTotal.setVisible(false);
+            vboxCustomerMain.setVisible(false);
+            vboxCashierMain.setVisible(false);
+            vboxCashierPaymentType.setVisible(false);
+            receiptAuthNumber.setVisible(false);
+            receiptCardNumber.setVisible(false);
         }
     }
     
+    class cancelOrderButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+
+        }
+    }
+
     public static void main(String args[]) {
         launch(args);
     }

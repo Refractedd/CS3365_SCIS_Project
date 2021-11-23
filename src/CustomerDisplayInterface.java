@@ -5,4 +5,7 @@ public class CustomerDisplayInterface{
     public double[] returnOrderTotal(double[] orderTotal) {
         return orderTotal;
     }
+    public double returnChangeAmount(double changeAmount) {
+        return changeAmount;
+    }
 }

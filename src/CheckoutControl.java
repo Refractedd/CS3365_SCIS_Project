@@ -32,8 +32,8 @@ public class CheckoutControl {
         }
     }
 
-    double[] calculateTotal(String[] memberAccountInfo, boolean loyalMember) {
-        calculatedOrderTotals = totalObj.calculateTotalPrice();
+    double[] calculateTotal(String[] memberAccountInfo, boolean loyalMember, double subTotal) {
+        calculatedOrderTotals = totalObj.calculateTotalPrice(subTotal);
         sendObj1.returnOrderTotal(calculatedOrderTotals);
         sendObj2.returnOrderTotal(calculatedOrderTotals);
         sendObj3.updateOrderTotal(calculatedOrderTotals);
