@@ -3,6 +3,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -16,50 +17,91 @@ import javafx.scene.layout.StackPane;
 
 public class Main extends Application{
     private String productInfo = "";
+    private String orderProductIDs = "";
     private TextField productIDEntry;
     private Label productInfoDisplayCashier;
     private Label productInfoDisplayCustomer;
-    private Label scaleItem;
-    private Label promptProductScale;
     private TextField productWeightEntry;
-    private Button scaleButton;
-    private Label promptProductID;
-    private Button idButton;
     private String[] foundProductInfo;
-    
-    public void start(Stage primaryStage) {
-        promptProductID = new Label("Product ID: ");
-        productIDEntry = new TextField();
+    private Label loyalMemberResultCashier;
+    private Label loyalMemberResultCustomer;
+    private TextField phoneNumEntry;
+    private TextField memberPINEntry;
+    Button totalButton;
+    VBox vboxCashierMain;
+    VBox vboxCashierScale;
+    VBox vboxCustomerMain;
+    VBox vboxCustomerLoyalMember;
 
-        idButton = new Button("ITEM-ID");
+    TouchScreenInterface objCashier = new TouchScreenInterface();
+    CreditDebitReaderInterface loyalCheckObj = new CreditDebitReaderInterface();
+    private boolean loyalMemberStatus = false;
+
+    public void start(Stage primaryStage) {
+        Label promptProductID = new Label("Product ID: ");
+        productIDEntry = new TextField();
+        Button idButton = new Button("ITEM-ID");
         idButton.setOnAction(new itemIDButtonHandler());
 
-        promptProductScale = new Label("Product Weight: ");
+        Label promptProductScale = new Label("Product Weight: ");
         productWeightEntry = new TextField();
-        scaleButton = new Button("SCALE");
+        Button scaleButton = new Button("SCALE");
         scaleButton.setOnAction(new scaleButtonHandler());
-        scaleItem = new Label("Bulk Item. Please Weight Item.");
-        promptProductScale.setVisible(false);
-        productWeightEntry.setVisible(false);
-        scaleButton.setVisible(false);
-        scaleItem.setVisible(false);
-        
+        Label scaleItem = new Label("Bulk Item. Please Weight Item.");
 
+        Label loyalMember = new Label("Please Enter Loyalty Membership Information.");
+        Label phoneNum = new Label("Phone Number: ");
+        Label memberPIN = new Label("Member PIN: ");
+        phoneNumEntry = new TextField();
+        memberPINEntry = new TextField();
+        Button loyalMemberSubmit = new Button("SUBMIT");
+        loyalMemberSubmit.setOnAction(new loyalMemberSubmitButtonHandler());
+        Button loyalMemberCancel = new Button("CANCEL");
+        loyalMemberCancel.setOnAction(new loyalMemberCancelButtonHandler());
+        loyalMemberResultCashier = new Label();
+        loyalMemberResultCashier.setVisible(false);
+        loyalMemberResultCustomer = new Label();
+        loyalMemberResultCustomer.setVisible(false);
+        
         productInfoDisplayCashier = new Label();
         productInfoDisplayCustomer = new Label();
-        HBox hbox1 = new HBox(10, promptProductID, productIDEntry, promptProductScale, productWeightEntry);
-        VBox vbox1 = new VBox(10, hbox1, idButton, scaleButton, scaleItem, productInfoDisplayCashier);
-        VBox vboxCustomer = new VBox(10, productInfoDisplayCustomer);
-        hbox1.setAlignment(Pos.CENTER);
-        vbox1.setAlignment(Pos.CENTER);
-        vbox1.setPadding(new Insets(5));
-        vboxCustomer.setAlignment(Pos.CENTER);
-        vboxCustomer.setPadding(new Insets(5));
+
+        totalButton = new Button("TOTAL");
+        totalButton.setOnAction(new calculateTotalButtonHandler());
+        totalButton.setVisible(false);
+
+        HBox hboxCashierMain = new HBox(10, promptProductID, productIDEntry);
+        HBox hboxCashierScale = new HBox(10, promptProductScale, productWeightEntry);
+        HBox hboxCustomerPhoneNum = new HBox(10, phoneNum, phoneNumEntry);
+        HBox hboxCustomermemberPIN = new HBox(10, memberPIN, memberPINEntry);
+        HBox hboxCustomerButtons = new HBox(10, loyalMemberSubmit, loyalMemberCancel);
+
+        vboxCashierMain = new VBox(10, loyalMemberResultCashier, hboxCashierMain, idButton, totalButton, productInfoDisplayCashier);
+        vboxCashierScale = new VBox(10, hboxCashierScale, scaleButton, scaleItem);
+        vboxCustomerMain = new VBox(10, loyalMemberResultCustomer, productInfoDisplayCustomer);
+        vboxCustomerLoyalMember = new VBox(10, loyalMember, hboxCustomerPhoneNum, hboxCustomermemberPIN, hboxCustomerButtons);
+
+        vboxCashierScale.setVisible(false);
+        vboxCustomerLoyalMember.setVisible(false);
+
+        hboxCashierMain.setAlignment(Pos.CENTER);
+        hboxCashierScale.setAlignment(Pos.CENTER);
+        hboxCustomerPhoneNum.setAlignment(Pos.CENTER);
+        hboxCustomermemberPIN.setAlignment(Pos.CENTER);
+        hboxCustomerButtons.setAlignment(Pos.CENTER);
+
+        vboxCashierMain.setAlignment(Pos.CENTER);
+        vboxCashierMain.setPadding(new Insets(5));
+        vboxCashierScale.setAlignment(Pos.CENTER);
+        vboxCashierScale.setPadding(new Insets(5));
+        vboxCustomerMain.setAlignment(Pos.CENTER);
+        vboxCustomerMain.setPadding(new Insets(5));
+        vboxCustomerLoyalMember.setAlignment(Pos.CENTER);
+        vboxCustomerLoyalMember.setPadding(new Insets(5));
+
         SplitPane splitPane = new SplitPane();
-
-        StackPane cashierDisplay = new StackPane(vbox1);
-        StackPane customerDisplay = new StackPane(vboxCustomer);
-
+        StackPane cashierDisplay = new StackPane(vboxCashierMain, vboxCashierScale);
+        StackPane customerDisplay = new StackPane(vboxCustomerMain, vboxCustomerLoyalMember);
         splitPane.getItems().addAll(cashierDisplay, customerDisplay);
 
         AnchorPane pane = new AnchorPane();
@@ -79,17 +121,20 @@ public class Main extends Application{
     class itemIDButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
-            TouchScreenInterface objCashier = new TouchScreenInterface();
+            totalButton.setVisible(true);
+            loyalMemberResultCashier.setVisible(false);
+            loyalMemberResultCustomer.setVisible(false);
             int productID = Integer.parseInt(productIDEntry.getText());
-            foundProductInfo = objCashier.requestProductInfo(productID);
+            orderProductIDs += Integer.toString(productID) + ", ";
+            foundProductInfo = objCashier.requestProductInfo(productID, loyalMemberStatus, orderProductIDs);
+            if (loyalMemberStatus == false) {
+                vboxCustomerLoyalMember.setVisible(true);
+                vboxCustomerMain.setVisible(false);
+                loyalMemberStatus = true;
+            }
             if (foundProductInfo[2].equals("True")) {
-                promptProductScale.setVisible(true);
-                productWeightEntry.setVisible(true);
-                scaleButton.setVisible(true);
-                scaleItem.setVisible(true);
-                promptProductID.setVisible(false);
-                productIDEntry.setVisible(false);
-                idButton.setVisible(false);
+                vboxCashierScale.setVisible(true);
+                vboxCashierMain.setVisible(false);
             }
             else {
                 productInfo += foundProductInfo[0] + " " + foundProductInfo[1] + "\n";
@@ -107,13 +152,49 @@ public class Main extends Application{
             productInfo += foundProductInfo[0] + " " + calculatedPrice + "\n";
             productInfoDisplayCashier.setText(String.format(productInfo));
             productInfoDisplayCustomer.setText(String.format(productInfo));
-            promptProductScale.setVisible(false);
-            productWeightEntry.setVisible(false);
-            scaleButton.setVisible(false);
-            scaleItem.setVisible(false);
-            promptProductID.setVisible(true);
-            productIDEntry.setVisible(true);
-            idButton.setVisible(true);
+            vboxCashierScale.setVisible(false);
+            vboxCashierMain.setVisible(true);
+        }
+    }
+
+    class loyalMemberSubmitButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            String memberPhoneNum = phoneNumEntry.getText();
+            String loaylMemberPIN = memberPINEntry.getText();
+            boolean loyal = loyalCheckObj.loyalMemberEntry(memberPhoneNum, loaylMemberPIN);
+            if (loyal == true) {
+                loyalMemberResultCashier.setText("Loyalty Member Account Verified.");
+                loyalMemberResultCustomer.setText("Loyalty Member Account Verified.");
+            }
+            else {
+                loyalMemberResultCashier.setText("Loyalty Member Account Denied.");
+                loyalMemberResultCustomer.setText("Loyalty Member Account Denied.");
+            }
+            loyalMemberResultCashier.setVisible(true);
+            loyalMemberResultCustomer.setVisible(true);
+            vboxCustomerLoyalMember.setVisible(false);
+            vboxCustomerMain.setVisible(true);
+        }
+    }
+
+    class loyalMemberCancelButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            loyalCheckObj.loyalMemberEntry("Cancel", "Cancel");
+            loyalMemberResultCashier.setText("Loyalty Member Account Cancelled.");
+            loyalMemberResultCustomer.setText("Loyalty Member Account Cancelled.");
+            loyalMemberResultCashier.setVisible(true);
+            loyalMemberResultCustomer.setVisible(true);
+            vboxCustomerLoyalMember.setVisible(false);
+            vboxCustomerMain.setVisible(true);
+        }
+    }
+
+    class calculateTotalButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+
         }
     }
     
