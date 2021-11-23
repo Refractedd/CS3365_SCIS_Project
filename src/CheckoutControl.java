@@ -1,8 +1,11 @@
 public class CheckoutControl {
-    public String[] foundProductInfo;
+    private String[] foundProductInfo;
+    private double[] calculatedOrderTotals;
+    private boolean loyaltyMemberStatus;
 
     ProductInventory inventoryObj = new ProductInventory();
     Order updateLoyaltyObj = new Order();
+    Order totalObj = new Order();
     LoyaltyMemberAccount loyalMemberObj = new LoyaltyMemberAccount();
 
     CustomerDisplayInterface sendObj1 = new CustomerDisplayInterface();
@@ -14,15 +17,6 @@ public class CheckoutControl {
         sendObj1.returnProductInfoCustomer(foundProductInfo);
         sendObj2.returnProductInfoReceipt(foundProductInfo);
         sendObj3.returnProductInfoOrder(productID, loyaltyStatus, currentProducts);
-        /*if (loyaltyStatus == false) {
-            int size = foundProductInfo.length;
-            String[] newFoundProductInfo = new String[size + 1];
-            newFoundProductInfo[0] = foundProductInfo[0];
-            newFoundProductInfo[1] = foundProductInfo[1];
-            newFoundProductInfo[2] = foundProductInfo[2];
-            newFoundProductInfo[3] = "NotChecked";
-            return newFoundProductInfo;
-        }*/
         return foundProductInfo;
     }
 
@@ -32,14 +26,18 @@ public class CheckoutControl {
             return false;
         }
         else {
-            boolean tempCheck = loyalMemberObj.checkLoyalMember(phoneNum, memberPIN);
-            updateLoyaltyObj.updatedLoyaltyChecked(tempCheck);
-            return tempCheck;
+            loyaltyMemberStatus = loyalMemberObj.checkLoyalMember(phoneNum, memberPIN);
+            updateLoyaltyObj.updatedLoyaltyChecked(loyaltyMemberStatus);
+            return loyaltyMemberStatus;
         }
     }
 
-    double[] calculateTotal() {
-        Order totalObj = new Order();
-        return totalObj.calculateTotalPrice();
+    double[] calculateTotal(String[] memberAccountInfo, boolean loyalMember) {
+        calculatedOrderTotals = totalObj.calculateTotalPrice();
+        sendObj1.returnOrderTotal(calculatedOrderTotals);
+        sendObj2.returnOrderTotal(calculatedOrderTotals);
+        sendObj3.updateOrderTotal(calculatedOrderTotals);
+        loyalMemberObj.updateLoyaltyCreditPoints(calculatedOrderTotals[1], loyalMember, memberAccountInfo);
+        return calculatedOrderTotals;
     }
 }

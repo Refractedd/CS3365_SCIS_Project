@@ -29,7 +29,7 @@ public class ProductInventory {
                     return "BulkProduct";
                 }*/ 
                 if (resultSet.getInt("ProductID") == productID) {
-                    String[] results = {resultSet.getString("ProductInfo"), Double.toString(resultSet.getDouble("ProductPrice")), resultSet.getString("BulkProduct"), 
+                    String[] results = {resultSet.getString("ProductInfo"), String.format("%.2f", resultSet.getDouble("ProductPrice")), resultSet.getString("BulkProduct"), 
                     Double.toString(resultSet.getDouble("DiscountInfo")), Integer.toString(resultSet.getInt("StockLevel")), resultSet.getString("InventoryMessage")};
                     int newStockLevel = resultSet.getInt("StockLevel") - 1;
                     if (newStockLevel < 10){

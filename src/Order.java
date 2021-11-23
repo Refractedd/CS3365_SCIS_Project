@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.text.DecimalFormat;
 public class Order {
     private int currentOrderID = 0;
     private boolean loyaltyChecked = false;
@@ -13,7 +14,6 @@ public class Order {
     void returnProductInfoOrder(int productID, boolean currentStatus, String currentProducts){
         try (Connection connection = DriverManager.getConnection(connectionUrl);
                 Statement statement = connection.createStatement();) {
-            System.out.println(currentStatus);
             if (currentStatus == false) {
                 PreparedStatement insertFirstProduct = connection.prepareStatement("INSERT INTO [dbo].[Order](Products, LoyaltyMemberStatus) VALUES('"+productID+"', 'NotChecked')");
                 insertFirstProduct.execute();
@@ -25,8 +25,6 @@ public class Order {
                     currentOrderID = resultSet.getInt("OrderID");
                 }
                 PreparedStatement insertRemainingProducts = connection.prepareStatement("UPDATE [dbo].[Order] SET Products = ? WHERE OrderID = ?");
-                System.out.println(currentProducts);
-                System.out.println(currentOrderID);
                 insertRemainingProducts.setString(1, currentProducts);
                 insertRemainingProducts.setInt(2, currentOrderID);
                 insertRemainingProducts.execute();
@@ -93,7 +91,31 @@ public class Order {
         catch (SQLException e) {
             e.printStackTrace();
         }
-        double[] find = {2.0, 3.0};
-        return find;
+        double[] empty = {0.0};
+        return empty;
+    }
+
+    void updateOrderTotal(double[] subTotalAndTotal) {
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+                Statement statement = connection.createStatement();) {
+            String selectSql = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSet = statement.executeQuery(selectSql);
+            while (resultSet.next()) {
+                currentOrderID = resultSet.getInt("OrderID");
+            }
+            DecimalFormat df = new DecimalFormat("#.##");
+            PreparedStatement updatedSubTotal = connection.prepareStatement("UPDATE [dbo].[Order] SET OrderSubtotal = ? WHERE OrderID = ?");
+            updatedSubTotal.setDouble(1, Double.parseDouble(df.format(subTotalAndTotal[0])));
+            updatedSubTotal.setInt(2, currentOrderID);
+            updatedSubTotal.execute();
+            PreparedStatement updatedTotal = connection.prepareStatement("UPDATE [dbo].[Order] SET OrderTotal = ? WHERE OrderID = ?");
+            updatedTotal.setDouble(1, Double.parseDouble(df.format(subTotalAndTotal[1])));
+            updatedTotal.setInt(2, currentOrderID);
+            updatedTotal.execute();
+            
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

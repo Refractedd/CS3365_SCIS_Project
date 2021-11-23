@@ -4,7 +4,7 @@ public class TouchScreenInterface{
         return checkoutObj.productInfo(productID, loyaltyStatus, currentProducts);
     }
 
-    double[] calculateTotal() {
-        return checkoutObj.calculateTotal();
+    double[] calculateTotal(String[] memberAccountInfo, boolean loyaltyMember) {
+        return checkoutObj.calculateTotal(memberAccountInfo, loyaltyMember);
     }
 }
