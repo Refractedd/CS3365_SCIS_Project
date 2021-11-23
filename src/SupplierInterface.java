@@ -1,2 +1,2 @@
-public interface SupplierInterface {
+public class SupplierInterface {
 }
