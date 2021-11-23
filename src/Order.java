@@ -63,4 +63,37 @@ public class Order {
         }
         return false;
     }
+
+    double[] calculateTotalPrice() {
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+                Statement statement = connection.createStatement();) {
+            String selectSql = "SELECT * FROM [dbo].[Order]";
+            ResultSet resultSet = statement.executeQuery(selectSql);
+            while (resultSet.next()) {
+                currentOrderID = resultSet.getInt("OrderID");
+            }
+            String requestProducts = "SELECT * FROM [dbo].[Order] WHERE OrderID = "+currentOrderID+"";
+            ResultSet resultSetProducts = statement.executeQuery(requestProducts);
+            String products = "";
+            while (resultSetProducts.next()) {
+                products = resultSetProducts.getString("Products");
+            }
+            String [] productsSplit = products.split(", ");
+            double productTotal = 0;
+            for (int i = 0; i < productsSplit.length; i++) {
+                String requestPrice = "SELECT * FROM [dbo].[ProductInventory] WHERE ProductID = "+productsSplit[i]+"";
+                ResultSet resultSetPrice = statement.executeQuery(requestPrice);
+                while (resultSetPrice.next()) {
+                    productTotal += resultSetPrice.getDouble("ProductPrice");
+                }
+            }
+            double[] finalTotals = {productTotal, productTotal + (productTotal * .0625)};
+            return finalTotals;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        double[] find = {2.0, 3.0};
+        return find;
+    }
 }

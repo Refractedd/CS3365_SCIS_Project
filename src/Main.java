@@ -33,7 +33,7 @@ public class Main extends Application{
     VBox vboxCustomerMain;
     VBox vboxCustomerLoyalMember;
 
-    TouchScreenInterface objCashier = new TouchScreenInterface();
+    TouchScreenInterface touchscreenObj = new TouchScreenInterface();
     CreditDebitReaderInterface loyalCheckObj = new CreditDebitReaderInterface();
     private boolean loyalMemberStatus = false;
 
@@ -126,7 +126,7 @@ public class Main extends Application{
             loyalMemberResultCustomer.setVisible(false);
             int productID = Integer.parseInt(productIDEntry.getText());
             orderProductIDs += Integer.toString(productID) + ", ";
-            foundProductInfo = objCashier.requestProductInfo(productID, loyalMemberStatus, orderProductIDs);
+            foundProductInfo = touchscreenObj.requestProductInfo(productID, loyalMemberStatus, orderProductIDs);
             if (loyalMemberStatus == false) {
                 vboxCustomerLoyalMember.setVisible(true);
                 vboxCustomerMain.setVisible(false);
@@ -194,7 +194,9 @@ public class Main extends Application{
     class calculateTotalButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
-
+            double[] test = touchscreenObj.calculateTotal();
+            System.out.println("Subtotal:" + test[0]);
+            System.out.println("Total:" + test[1]);
         }
     }
     

@@ -37,4 +37,9 @@ public class CheckoutControl {
             return tempCheck;
         }
     }
+
+    double[] calculateTotal() {
+        Order totalObj = new Order();
+        return totalObj.calculateTotalPrice();
+    }
 }
