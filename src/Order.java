@@ -7,7 +7,7 @@ public class Order {
                 "jdbc:sqlserver://projectpain.database.windows.net:1433;"
                 + "database=supermarketSystem;"
                 + "user=projectpainAdmin@projectpain;"
-                + "password=Jaredhatessoftwareengineering100;"
+                + "password=SoftwareEngineeringProject12345;"
                 + "encrypt=true;"
                 + "trustServerCertificate=false;"
                 + "loginTimeout=30;";
@@ -22,7 +22,9 @@ public class Order {
                 String selectSql = "SELECT * FROM [dbo].[Order]";
                 ResultSet resultSet = statement.executeQuery(selectSql);
                 while (resultSet.next()) {
-                    currentOrderID = resultSet.getInt("OrderID");
+                    if (currentOrderID < resultSet.getInt("OrderID")) {
+                        currentOrderID = resultSet.getInt("OrderID");
+                    }
                 }
                 PreparedStatement insertRemainingProducts = connection.prepareStatement("UPDATE [dbo].[Order] SET Products = ? WHERE OrderID = ?");
                 insertRemainingProducts.setString(1, currentProducts);
@@ -41,7 +43,9 @@ public class Order {
             String selectSql = "SELECT * FROM [dbo].[Order]";
             ResultSet resultSet = statement.executeQuery(selectSql);
             while (resultSet.next()) {
-                currentOrderID = resultSet.getInt("OrderID");
+                if (currentOrderID < resultSet.getInt("OrderID")) {
+                    currentOrderID = resultSet.getInt("OrderID");
+                }
             }
             if (memberStatus == true) {
                 PreparedStatement updatedLoyalty = connection.prepareStatement("UPDATE [dbo].[Order] SET LoyaltyMemberStatus = 'Loyal' WHERE OrderID = ?");
@@ -68,7 +72,9 @@ public class Order {
             String selectSql = "SELECT * FROM [dbo].[Order]";
             ResultSet resultSet = statement.executeQuery(selectSql);
             while (resultSet.next()) {
-                currentOrderID = resultSet.getInt("OrderID");
+                if (currentOrderID < resultSet.getInt("OrderID")) {
+                    currentOrderID = resultSet.getInt("OrderID");
+                }
             }
             String requestProducts = "SELECT * FROM [dbo].[Order] WHERE OrderID = "+currentOrderID+"";
             ResultSet resultSetProducts = statement.executeQuery(requestProducts);
@@ -101,7 +107,9 @@ public class Order {
             String selectSql = "SELECT * FROM [dbo].[Order]";
             ResultSet resultSet = statement.executeQuery(selectSql);
             while (resultSet.next()) {
-                currentOrderID = resultSet.getInt("OrderID");
+                if (currentOrderID < resultSet.getInt("OrderID")) {
+                    currentOrderID = resultSet.getInt("OrderID");
+                }
             }
             DecimalFormat df = new DecimalFormat("#.##");
             PreparedStatement updatedSubTotal = connection.prepareStatement("UPDATE [dbo].[Order] SET OrderSubtotal = ? WHERE OrderID = ?");
@@ -125,7 +133,9 @@ public class Order {
             String selectSql = "SELECT * FROM [dbo].[Order]";
             ResultSet resultSet = statement.executeQuery(selectSql);
             while (resultSet.next()) {
-                currentOrderID = resultSet.getInt("OrderID");
+                if (currentOrderID < resultSet.getInt("OrderID")) {
+                    currentOrderID = resultSet.getInt("OrderID");
+                }
             }
             PreparedStatement updatedPaymentAmount = connection.prepareStatement("UPDATE [dbo].[Order] SET PaymentAmount = ? WHERE OrderID = ?");
             updatedPaymentAmount.setDouble(1, Double.parseDouble(paymentAmount));
@@ -149,7 +159,9 @@ public class Order {
             ResultSet resultSet = statement.executeQuery(selectOrder);
             double calculatedChange = 0.0;
             while (resultSet.next()) {
-                currentOrderID = resultSet.getInt("OrderID");
+                if (currentOrderID < resultSet.getInt("OrderID")) {
+                    currentOrderID = resultSet.getInt("OrderID");
+                }
             }
             PreparedStatement updatedPaymentAmount = connection.prepareStatement("UPDATE [dbo].[Order] SET AuthorizationNum = ? WHERE OrderID = ?");
             updatedPaymentAmount.setInt(1, authorizationNum);
@@ -177,8 +189,14 @@ public class Order {
             ResultSet resultSet = statement.executeQuery(selectOrder);
             double calculatedChange = 0.0;
             while (resultSet.next()) {
-                currentOrderID = resultSet.getInt("OrderID");
+                if (currentOrderID < resultSet.getInt("OrderID")) {
+                    currentOrderID = resultSet.getInt("OrderID");
+                }
             }
+            PreparedStatement updatedPaymentAmount = connection.prepareStatement("UPDATE [dbo].[Order] SET AuthorizationNum = ? WHERE OrderID = ?");
+            updatedPaymentAmount.setInt(1, 1);
+            updatedPaymentAmount.setInt(2, currentOrderID);
+            updatedPaymentAmount.execute();
             String selectTotalAndPaymentAmount = "SELECT * FROM [dbo].[Order]";
             ResultSet resultSetChange = statement.executeQuery(selectTotalAndPaymentAmount);
             while (resultSetChange.next()) {

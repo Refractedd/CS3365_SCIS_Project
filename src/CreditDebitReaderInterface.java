@@ -9,7 +9,7 @@ public class CreditDebitReaderInterface {
         return creditDebitObj.creditDebitEntry(cardNumber, expDate, CVV, billingZipCode);
     }
 
-    double cashOrChangeEntry() {
+    double cashOrCheckEntry() {
         PaymentControl cashOrCheckObj = new PaymentControl();
         return cashOrCheckObj.cashOrCheckEntry();
     }

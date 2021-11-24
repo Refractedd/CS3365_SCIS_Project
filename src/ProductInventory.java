@@ -9,7 +9,7 @@ public class ProductInventory {
                 "jdbc:sqlserver://projectpain.database.windows.net:1433;"
                 + "database=supermarketSystem;"
                 + "user=projectpainAdmin@projectpain;"
-                + "password=Jaredhatessoftwareengineering100;"
+                + "password=SoftwareEngineeringProject12345;"
                 + "encrypt=true;"
                 + "trustServerCertificate=false;"
                 + "loginTimeout=30;";

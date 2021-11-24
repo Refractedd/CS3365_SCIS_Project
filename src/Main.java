@@ -58,6 +58,7 @@ public class Main extends Application{
     private Label receiptAuthNumber;
     private Label receiptTotalInformation;
     private Label cardDenied;
+    Button verifyCheckButton;
     Button cancelOrderButton;
     Button totalButton;
     Button idButton;
@@ -73,6 +74,7 @@ public class Main extends Application{
     VBox vboxCustomerCreditDebitPayment;
     VBox vboxEndCheckout;
     VBox vboxCustomerReceipt;
+    VBox vboxCashierVerifyCheck;
 
     TouchScreenInterface touchscreenObj = new TouchScreenInterface();
     CreditDebitReaderInterface creditDebitReaderObj = new CreditDebitReaderInterface();
@@ -177,6 +179,9 @@ public class Main extends Application{
         cancelOrderButton.setOnAction(new cancelOrderButtonHandler());
         cardDenied.setVisible(false);
         cancelOrderButton.setVisible(false);
+        Label verifyCheck = new Label("Please Verify Check.");
+        verifyCheckButton = new Button("VERIFY CHECK");
+        verifyCheckButton.setOnAction(new verifyCheckButtonHandler());
 
         Label promptCardNumber = new Label("Card Number: ");
         cardNumberEntry = new TextField();
@@ -211,6 +216,7 @@ public class Main extends Application{
         vboxCustomerCreditDebitPayment = new VBox(10, hboxCardNum, hboxExpDate, hboxCVV, hboxZipCode, submitCardInfoButton);
         vboxEndCheckout = new VBox(10, closeTillButton);
         vboxCustomerReceipt = new VBox(10, receipt, receiptProductInfo, receiptAuthNumber, receiptCardNumber, receiptTotalInformation);
+        vboxCashierVerifyCheck = new VBox(10, verifyCheck, verifyCheckButton);
 
         hboxPaymentAmount.setAlignment(Pos.CENTER);
         hboxCardNum.setAlignment(Pos.CENTER);
@@ -234,8 +240,12 @@ public class Main extends Application{
         vboxCustomerReceipt.setPadding(new Insets(50,20,50,20));
         vboxCustomerReceipt.setVisible(false);
 
+        vboxCashierVerifyCheck.setAlignment(Pos.CENTER);
+        vboxCashierVerifyCheck.setPadding(new Insets(50,20,50,20));
+        vboxCashierVerifyCheck.setVisible(false);
+
         SplitPane splitPane = new SplitPane();
-        StackPane cashierDisplay = new StackPane(vboxCashierMain, vboxCashierEntry, vboxCashierScale, vboxCashierTotal, vboxCashierPaymentType, vboxEndCheckout);
+        StackPane cashierDisplay = new StackPane(vboxCashierMain, vboxCashierEntry, vboxCashierScale, vboxCashierTotal, vboxCashierPaymentType, vboxEndCheckout, vboxCashierVerifyCheck);
         StackPane customerDisplay = new StackPane(vboxCustomerMain, vboxCustomerLoyalMember, vboxCustomerTotal, vboxCustomerCreditDebitPayment, vboxCustomerReceipt);
         splitPane.getItems().addAll(cashierDisplay, customerDisplay);
         
@@ -391,20 +401,13 @@ public class Main extends Application{
         }
     }
 
-    class closeTillButtonHandler implements EventHandler<ActionEvent> {
-        @Override
-        public void handle(ActionEvent event) {
-
-        }
-    }
-
     class cashButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
             String paymentAmount = paymentAmountEntry.getText();
             String paymentType = "Cash";
             touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
-            calculatedChangeCashCheck = creditDebitReaderObj.cashOrChangeEntry();
+            calculatedChangeCashCheck = creditDebitReaderObj.cashOrCheckEntry();
             changeAmountCashier.setVisible(true);
             changeAmountCashier.setText("Change Amount: $" + df.format(calculatedChangeCashCheck));
             receiptProductInfo.setText(productInfo);
@@ -427,11 +430,19 @@ public class Main extends Application{
             String paymentAmount = paymentAmountEntry.getText();
             String paymentType = "Check";
             touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
-            calculatedChangeCashCheck = creditDebitReaderObj.cashOrChangeEntry();
+            vboxCashierVerifyCheck.setVisible(true);
+            vboxCashierPaymentType.setVisible(false);
+        }
+    }
+    
+    class verifyCheckButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+            calculatedChangeCashCheck = creditDebitReaderObj.cashOrCheckEntry();
             changeAmountCashier.setVisible(true);
             changeAmountCashier.setText("Change Amount: $" + df.format(calculatedChangeCashCheck));
             receiptProductInfo.setText(productInfo);
-            receiptTotalInformation.setText("Check Payment \n Subtotal: $" + df.format(totalValues[0]) + "\n" + "Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]) + "\n" + "Total: $"+ df.format(totalValues[1]) + "\n" + "Change Amount: $" + df.format(calculatedChangeCashCheck));
+            receiptTotalInformation.setText("Check Payment \nSubtotal: $" + df.format(totalValues[0]) + "\n" + "Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]) + "\n" + "Total: $"+ df.format(totalValues[1]) + "\n" + "Change Amount: $" + df.format(calculatedChangeCashCheck));
             vboxCustomerCreditDebitPayment.setVisible(false);
             vboxEndCheckout.setVisible(true);
             vboxCustomerReceipt.setVisible(true);
@@ -441,10 +452,18 @@ public class Main extends Application{
             vboxCashierPaymentType.setVisible(false);
             receiptAuthNumber.setVisible(false);
             receiptCardNumber.setVisible(false);
+            vboxCashierVerifyCheck.setVisible(false);
         }
     }
-    
+
     class cancelOrderButtonHandler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event) {
+
+        }
+    }
+
+    class closeTillButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
 
