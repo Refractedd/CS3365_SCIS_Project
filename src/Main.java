@@ -58,11 +58,16 @@ public class Main extends Application{
     private Label receiptAuthNumber;
     private Label receiptTotalInformation;
     private Label cardDenied;
+    private Label cashierLabel;
+    private Label customerLabel;
+    private Label cancelOrderLabel;
     Button verifyCheckButton;
     Button cancelOrderButton;
     Button totalButton;
     Button idButton;
     HBox hboxCashierMain;
+    VBox vboxCashierLabel;
+    VBox vboxCustomerLabel;
     VBox vboxCashierMain;
     VBox vboxCashierScale;
     VBox vboxCashierTotal;
@@ -81,6 +86,9 @@ public class Main extends Application{
     
 
     public void start(Stage primaryStage) {
+        cashierLabel = new Label("Cashier Display");
+        customerLabel = new Label("Customer Display");
+        
         Label promptProductID = new Label("Product ID: ");
         productIDEntry = new TextField();
         idButton = new Button("ITEM-ID");
@@ -130,12 +138,14 @@ public class Main extends Application{
         HBox hboxCustomerPhoneNum = new HBox(10, phoneNum, phoneNumEntry);
         HBox hboxCustomerMemberPIN = new HBox(10, memberPIN, memberPINEntry);
         HBox hboxCustomerButtons = new HBox(10, loyalMemberSubmit, loyalMemberCancel);
-
+        
+        vboxCashierLabel = new VBox(10, cashierLabel);
         vboxCashierMain = new VBox(10, loyalMemberResultCashier, productInfoDisplayCashier);
         vboxCashierEntry = new VBox(10, hboxCashierMain, idButton, totalButton);
         vboxCashierScale = new VBox(10, hboxCashierScale, scaleButton, scaleItem);
         vboxCashierTotal = new VBox(10, subTotalCashier, taxCashier, finalTotalCashier, changeAmountCashier);
         
+        vboxCustomerLabel = new VBox(10, customerLabel);
         vboxCustomerMain = new VBox(10, loyalMemberResultCustomer, productInfoDisplayCustomer);
         vboxCustomerLoyalMember = new VBox(10, loyalMember, hboxCustomerPhoneNum, hboxCustomerMemberPIN, hboxCustomerButtons);
         vboxCustomerTotal = new VBox(10, subTotalCustomer, taxCustomer, finalTotalCustomer, changeAmountCustomer);
@@ -151,6 +161,8 @@ public class Main extends Application{
         hboxCustomerMemberPIN.setAlignment(Pos.CENTER);
         hboxCustomerButtons.setAlignment(Pos.CENTER);
 
+        vboxCashierLabel.setAlignment(Pos.TOP_CENTER);
+        vboxCashierLabel.setPadding(new Insets(50,20,50,20));
         vboxCashierMain.setAlignment(Pos.TOP_CENTER);
         vboxCashierMain.setPadding(new Insets(50,20,50,20));
         vboxCashierEntry.setAlignment(Pos.CENTER);
@@ -159,6 +171,8 @@ public class Main extends Application{
         vboxCashierScale.setPadding(new Insets(50,20,50,20));
         vboxCashierTotal.setAlignment(Pos.BOTTOM_CENTER);
         vboxCashierTotal.setPadding(new Insets(50,20,50,20));
+        vboxCustomerLabel.setAlignment(Pos.TOP_CENTER);
+        vboxCustomerLabel.setPadding(new Insets(50,20,50,20));
         vboxCustomerMain.setAlignment(Pos.TOP_CENTER);
         vboxCustomerMain.setPadding(new Insets(50,20,50,20));
         vboxCustomerLoyalMember.setAlignment(Pos.CENTER);
@@ -182,6 +196,8 @@ public class Main extends Application{
         Label verifyCheck = new Label("Please Verify Check.");
         verifyCheckButton = new Button("VERIFY CHECK");
         verifyCheckButton.setOnAction(new verifyCheckButtonHandler());
+        cancelOrderLabel = new Label("Order Cancelled.");
+        cancelOrderLabel.setVisible(false);
 
         Label promptCardNumber = new Label("Card Number: ");
         cardNumberEntry = new TextField();
@@ -214,7 +230,7 @@ public class Main extends Application{
 
         vboxCashierPaymentType = new VBox(10, cardDenied, openTill, hboxPaymentAmount, creditDebitPaymentButton, cashPaymentButton, checkPaymentButton, cancelOrderButton);
         vboxCustomerCreditDebitPayment = new VBox(10, hboxCardNum, hboxExpDate, hboxCVV, hboxZipCode, submitCardInfoButton);
-        vboxEndCheckout = new VBox(10, closeTillButton);
+        vboxEndCheckout = new VBox(10, cancelOrderLabel, closeTillButton);
         vboxCustomerReceipt = new VBox(10, receipt, receiptProductInfo, receiptAuthNumber, receiptCardNumber, receiptTotalInformation);
         vboxCashierVerifyCheck = new VBox(10, verifyCheck, verifyCheckButton);
 
@@ -245,8 +261,8 @@ public class Main extends Application{
         vboxCashierVerifyCheck.setVisible(false);
 
         SplitPane splitPane = new SplitPane();
-        StackPane cashierDisplay = new StackPane(vboxCashierMain, vboxCashierEntry, vboxCashierScale, vboxCashierTotal, vboxCashierPaymentType, vboxEndCheckout, vboxCashierVerifyCheck);
-        StackPane customerDisplay = new StackPane(vboxCustomerMain, vboxCustomerLoyalMember, vboxCustomerTotal, vboxCustomerCreditDebitPayment, vboxCustomerReceipt);
+        StackPane cashierDisplay = new StackPane(vboxCashierLabel, vboxCashierMain, vboxCashierEntry, vboxCashierScale, vboxCashierTotal, vboxCashierPaymentType, vboxEndCheckout, vboxCashierVerifyCheck);
+        StackPane customerDisplay = new StackPane(vboxCustomerLabel, vboxCustomerMain, vboxCustomerLoyalMember, vboxCustomerTotal, vboxCustomerCreditDebitPayment, vboxCustomerReceipt);
         splitPane.getItems().addAll(cashierDisplay, customerDisplay);
         
 
@@ -278,6 +294,7 @@ public class Main extends Application{
                 loyalMemberChecked = true;
             }
             if (foundProductInfo[2].equals("True")) {
+                cashierLabel.setText("Scale Interface");
                 vboxCashierScale.setVisible(true);
                 vboxCashierEntry.setVisible(false);
             }
@@ -286,6 +303,8 @@ public class Main extends Application{
                 subTotal += Double.parseDouble(foundProductInfo[1]);
                 productInfoDisplayCashier.setText(String.format(productInfo));
                 productInfoDisplayCustomer.setText(String.format(productInfo));
+                cashierLabel.setVisible(true);
+                customerLabel.setVisible(true);
             }
         }
     }
@@ -301,6 +320,7 @@ public class Main extends Application{
             productInfoDisplayCustomer.setText(String.format(productInfo));
             vboxCashierScale.setVisible(false);
             vboxCashierEntry.setVisible(true);
+            cashierLabel.setText("Cashier Display");
         }
     }
 
@@ -324,6 +344,8 @@ public class Main extends Application{
             loyalMemberResultCustomer.setVisible(true);
             vboxCustomerLoyalMember.setVisible(false);
             vboxCustomerMain.setVisible(true);
+            cashierLabel.setVisible(false);
+            customerLabel.setVisible(false);
         }
     }
 
@@ -338,6 +360,8 @@ public class Main extends Application{
             loyalMemberResultCustomer.setVisible(true);
             vboxCustomerLoyalMember.setVisible(false);
             vboxCustomerMain.setVisible(true);
+            cashierLabel.setVisible(false);
+            customerLabel.setVisible(false);
         }
     }
 
@@ -359,6 +383,10 @@ public class Main extends Application{
             vboxCustomerTotal.setVisible(true);
             vboxCashierPaymentType.setVisible(true);
             openTill.setVisible(true);
+            loyalMemberResultCashier.setVisible(false);
+            loyalMemberResultCustomer.setVisible(false);
+            cashierLabel.setVisible(true);
+            customerLabel.setVisible(true);
         }
     }
 
@@ -397,6 +425,7 @@ public class Main extends Application{
                 vboxCustomerMain.setVisible(false);
                 vboxCashierMain.setVisible(false);
                 vboxCashierPaymentType.setVisible(false);
+                customerLabel.setText("Receipt Printer Interface");
             }
         }
     }
@@ -404,6 +433,7 @@ public class Main extends Application{
     class cashButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
+            customerLabel.setText("Receipt Printer Interface");
             String paymentAmount = paymentAmountEntry.getText();
             String paymentType = "Cash";
             touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
@@ -432,12 +462,15 @@ public class Main extends Application{
             touchscreenObj.returnPaymentTypeAmount(paymentAmount, paymentType);
             vboxCashierVerifyCheck.setVisible(true);
             vboxCashierPaymentType.setVisible(false);
+            cashierLabel.setText("Check Reader Interface");
         }
     }
     
     class verifyCheckButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
+            cashierLabel.setText("Cashier Display");
+            customerLabel.setText("Receipt Printer Interface");
             calculatedChangeCashCheck = creditDebitReaderObj.cashOrCheckEntry();
             changeAmountCashier.setVisible(true);
             changeAmountCashier.setText("Change Amount: $" + df.format(calculatedChangeCashCheck));
@@ -459,14 +492,21 @@ public class Main extends Application{
     class cancelOrderButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
-
+            customerLabel.setText("Order Cancelled.");
+            vboxCustomerMain.setVisible(false);
+            vboxCustomerTotal.setVisible(false);
+            vboxCashierTotal.setVisible(false);
+            vboxCashierPaymentType.setVisible(false);
+            vboxEndCheckout.setVisible(true);
+            cancelOrderLabel.setVisible(true);
+            vboxCashierMain.setVisible(false);
         }
     }
 
     class closeTillButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
-
+            System.exit(0);
         }
     }
 
