@@ -14,6 +14,8 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import java.text.DecimalFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Main extends Application{
     DecimalFormat df = new DecimalFormat("#.##");
@@ -512,5 +514,19 @@ public class Main extends Application{
 
     public static void main(String args[]) {
         launch(args);
+        while (true) {
+            String currentTime = "";
+            LocalTime time = LocalTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            currentTime = time.format(formatter);
+            currentTime = currentTime.substring(0,3);
+            System.out.println(currentTime);
+            if (currentTime.equals("18")) {
+                TimerInterface timerInterfaceObj = new TimerInterface();
+                timerInterfaceObj.timerInput();
+                System.out.println("Inventory Order Created and Sent. See you Tomorrow.");
+                System.exit(0);
+            }
+        }
     }
 }
