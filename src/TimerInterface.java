@@ -1,6 +1,6 @@
 public class TimerInterface {
-    void timerInput() {
+    String timerInput() {
         InventoryControl inventoryObj = new InventoryControl();
-        inventoryObj.timerInput();
+        return inventoryObj.timerInput();
     }
 }

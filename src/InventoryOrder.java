@@ -9,7 +9,7 @@ public class InventoryOrder {
                 + "encrypt=true;"
                 + "trustServerCertificate=false;"
                 + "loginTimeout=30;";
-    void createAndSendOrder(String productsToOrder) {
+    void createOrder(String productsToOrder) {
         try (Connection connection = DriverManager.getConnection(connectionUrl);
                 Statement statement = connection.createStatement();) {
             PreparedStatement createOrder = connection.prepareStatement("INSERT INTO [dbo].[InventoryOrder](ProductsAndQuantities) VALUES('"+productsToOrder+"')");

@@ -67,6 +67,7 @@ public class Main extends Application{
     Button cancelOrderButton;
     Button totalButton;
     Button idButton;
+    Button inventoryOrderButton;
     HBox hboxCashierMain;
     VBox vboxCashierLabel;
     VBox vboxCustomerLabel;
@@ -218,6 +219,10 @@ public class Main extends Application{
         closeTillButton = new Button("Order Complete. Close Till.");
         closeTillButton.setOnAction(new closeTillButtonHandler());
 
+        inventoryOrderButton = new Button("Inventory Order Created and Sent. Press to Turn Off Register.");
+        inventoryOrderButton.setOnAction(new inventoryOrderButtonHandler());
+        inventoryOrderButton.setVisible(false);
+
         Label receipt = new Label("Order Receipt");
         receiptProductInfo = new Label();
         receiptAuthNumber = new Label();
@@ -232,7 +237,7 @@ public class Main extends Application{
 
         vboxCashierPaymentType = new VBox(10, cardDenied, openTill, hboxPaymentAmount, creditDebitPaymentButton, cashPaymentButton, checkPaymentButton, cancelOrderButton);
         vboxCustomerCreditDebitPayment = new VBox(10, hboxCardNum, hboxExpDate, hboxCVV, hboxZipCode, submitCardInfoButton);
-        vboxEndCheckout = new VBox(10, cancelOrderLabel, closeTillButton);
+        vboxEndCheckout = new VBox(10, cancelOrderLabel, closeTillButton, inventoryOrderButton);
         vboxCustomerReceipt = new VBox(10, receipt, receiptProductInfo, receiptAuthNumber, receiptCardNumber, receiptTotalInformation);
         vboxCashierVerifyCheck = new VBox(10, verifyCheck, verifyCheckButton);
 
@@ -421,6 +426,7 @@ public class Main extends Application{
                 receiptCardNumber.setText("Card Number: " + cardNum);
                 receiptTotalInformation.setText("Subtotal: $" + df.format(totalValues[0]) + "\n" + "Sales Tax (6.25%): $" + df.format(totalValues[1] - totalValues[0]) + "\n" + "Total: $"+ df.format(totalValues[1]) + "\n" + "Change Amount: $" + df.format(calculatedChangeAuthNum[0]));
                 vboxCustomerCreditDebitPayment.setVisible(false);
+                closeTillButton.setVisible(true);
                 vboxEndCheckout.setVisible(true);
                 vboxCustomerReceipt.setVisible(true);
                 vboxCustomerTotal.setVisible(false);
@@ -453,6 +459,7 @@ public class Main extends Application{
             vboxCashierPaymentType.setVisible(false);
             receiptAuthNumber.setVisible(false);
             receiptCardNumber.setVisible(false);
+            closeTillButton.setVisible(true);
         }
     }
 
@@ -488,6 +495,7 @@ public class Main extends Application{
             receiptAuthNumber.setVisible(false);
             receiptCardNumber.setVisible(false);
             vboxCashierVerifyCheck.setVisible(false);
+            closeTillButton.setVisible(true);
         }
     }
 
@@ -508,25 +516,56 @@ public class Main extends Application{
     class closeTillButtonHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
+            String currentTime = "";
+            LocalTime time = LocalTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            currentTime = time.format(formatter);
+            currentTime = currentTime.substring(0,2);
+            customerLabel.setText("Customer Display");
+            vboxCashierTotal.setVisible(false);
+            vboxCustomerReceipt.setVisible(false);
+            closeTillButton.setVisible(false);
+            vboxEndCheckout.setVisible(false);
+            if (currentTime.equals("20")) {
+                TimerInterface timerInterfaceObj = new TimerInterface();
+                String orderStatus = timerInterfaceObj.timerInput();
+                if (orderStatus.equals("") != true) {
+                    inventoryOrderButton.setVisible(true);
+                }
+                else {
+                    inventoryOrderButton.setText("No Inventory Order Needed. Press to Turn Off Register.");
+                    inventoryOrderButton.setVisible(true);
+                }
+            }
+            else {
+                cardNum = "";
+                subTotal = 0;
+                bulkWeight = 0.0;
+                calculatedChangeCashCheck = 0.0;
+                productInfo = "";
+                orderProductIDs = "";
+                memberPhoneNum = "";
+                loyalMemberPIN = "";
+                loyalMemberChecked = false;
+                loyalMemberStatus = false;
+                productInfoDisplayCashier.setText(productInfo);
+                idButton.setVisible(true);
+                vboxCashierEntry.setVisible(true);
+                vboxCashierMain.setVisible(true);
+                cardDenied.setVisible(false);
+                cancelOrderButton.setVisible(false);
+            }
+        }
+    }
+
+    class inventoryOrderButtonHandler implements EventHandler<ActionEvent> {
+        @Override 
+        public void handle(ActionEvent event) {
             System.exit(0);
         }
     }
 
     public static void main(String args[]) {
         launch(args);
-        while (true) {
-            String currentTime = "";
-            LocalTime time = LocalTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            currentTime = time.format(formatter);
-            currentTime = currentTime.substring(0,3);
-            System.out.println(currentTime);
-            if (currentTime.equals("18")) {
-                TimerInterface timerInterfaceObj = new TimerInterface();
-                timerInterfaceObj.timerInput();
-                System.out.println("Inventory Order Created and Sent. See you Tomorrow.");
-                System.exit(0);
-            }
-        }
     }
 }
