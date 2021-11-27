@@ -526,6 +526,7 @@ public class Main extends Application{
             vboxCustomerReceipt.setVisible(false);
             closeTillButton.setVisible(false);
             vboxEndCheckout.setVisible(false);
+            cancelOrderLabel.setVisible(false);
             if (currentTime.equals("20")) {
                 TimerInterface timerInterfaceObj = new TimerInterface();
                 String orderStatus = timerInterfaceObj.timerInput();
