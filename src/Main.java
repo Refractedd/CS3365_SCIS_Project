@@ -517,17 +517,20 @@ public class Main extends Application{
         @Override
         public void handle(ActionEvent event) {
             String currentTime = "";
+            Integer currentTimeInt;
             LocalTime time = LocalTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             currentTime = time.format(formatter);
             currentTime = currentTime.substring(0,2);
+            currentTimeInt = Integer.parseInt(currentTime);
             customerLabel.setText("Customer Display");
             vboxCashierTotal.setVisible(false);
             vboxCustomerReceipt.setVisible(false);
             closeTillButton.setVisible(false);
-            vboxEndCheckout.setVisible(false);
             cancelOrderLabel.setVisible(false);
-            if (currentTime.equals("20")) {
+            System.out.println(currentTimeInt);
+            vboxEndCheckout.setVisible(true);
+            if (currentTimeInt > 15) {
                 TimerInterface timerInterfaceObj = new TimerInterface();
                 String orderStatus = timerInterfaceObj.timerInput();
                 if (orderStatus.equals("") != true) {
@@ -550,6 +553,7 @@ public class Main extends Application{
                 loyalMemberChecked = false;
                 loyalMemberStatus = false;
                 productInfoDisplayCashier.setText(productInfo);
+                changeAmountCashier.setText("");
                 idButton.setVisible(true);
                 vboxCashierEntry.setVisible(true);
                 vboxCashierMain.setVisible(true);

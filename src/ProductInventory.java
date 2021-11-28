@@ -1,8 +1,5 @@
 import java.sql.*;
 public class ProductInventory {
-    public int price;
-    public int amount;
-    public int id;
     String connectionUrl =
         "jdbc:sqlserver://projectpain.database.windows.net:1433;"
         + "database=supermarketSystem;"
